@@ -25,7 +25,10 @@ namespace BTCPayServer.Lightning
         public static async Task<ClientWebSocket> CreateClientWebSocket(string url, string authorizationValue, CancellationToken cancellation = default(CancellationToken))
         {
             var socket = new ClientWebSocket();
-            socket.Options.SetRequestHeader("Authorization", authorizationValue);
+            if (authorizationValue != null)
+            {
+                socket.Options.SetRequestHeader("Authorization", authorizationValue);
+            }
             var uri = new UriBuilder(url) { UserName = null, Password = null }.Uri.AbsoluteUri;
             if (!uri.EndsWith("/"))
                 uri += "/";

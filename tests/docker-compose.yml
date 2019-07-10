@@ -232,7 +232,7 @@ services:
   ptarmigan:
     restart: unless-stopped
     stop_signal: SIGKILL
-    image: nayutaco/ptarmigan:0.1.5
+    image: nayutaco/ptarmigan:0.1.6
     environment:
       NODE_NAME: test
       CHAIN: regtest
@@ -257,7 +257,7 @@ services:
   ptarmigan_dest:
     restart: unless-stopped
     stop_signal: SIGKILL
-    image: nayutaco/ptarmigan:0.1.5
+    image: nayutaco/ptarmigan:0.1.6
     environment:
       NODE_NAME: test
       CHAIN: regtest
