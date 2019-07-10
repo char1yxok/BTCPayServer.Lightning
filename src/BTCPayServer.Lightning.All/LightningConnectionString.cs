@@ -347,6 +347,8 @@ namespace BTCPayServer.Lightning
                         return false;
                     }
 
+                    var apiToken = Take(keyValues, "apiToken");
+
                     result.BaseUri = ptarmiganuri;
 
                     break;

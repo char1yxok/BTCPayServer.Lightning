@@ -19,8 +19,9 @@ namespace BTCPayServer.Lightning.Ptarmigan
         private readonly RPCClient _rpcClient;
         private readonly PtarmiganClient _ptarmiganClient;
         private readonly Uri _address;
+        private readonly string _apiToken;
 
-        public PtarmiganLightningClient(Uri address, Network network, RPCClient rpcClient, HttpClient httpClient = null)
+        public PtarmiganLightningClient(Uri address, string apiToken, Network network, RPCClient rpcClient, HttpClient httpClient = null)
         {
 
             if (address == null)
@@ -30,7 +31,8 @@ namespace BTCPayServer.Lightning.Ptarmigan
             _address = address;
             _network = network;
             _rpcClient = rpcClient;
-            _ptarmiganClient = new PtarmiganClient(address, httpClient);
+            _apiToken = apiToken;
+            _ptarmiganClient = new PtarmiganClient(address, apiToken, httpClient);
         }
 
         public async Task ConnectTo(NodeInfo nodeInfo)
@@ -197,7 +199,7 @@ namespace BTCPayServer.Lightning.Ptarmigan
         public async Task<ILightningInvoiceListener> Listen(CancellationToken cancellation = default(CancellationToken))
         {
             return new PtarmiganSession(
-                await WebsocketHelper.CreateClientWebSocket(_address.ToString(), null, cancellation), _network, this);
+                await WebsocketHelper.CreateClientWebSocket(_address.ToString(), "Bearer " + _apiToken, cancellation), _network, this);
         }
 
         internal LightningInvoice GetLightningInvoiceObject(ListInvoiceResultResponse invoice, Network network)
