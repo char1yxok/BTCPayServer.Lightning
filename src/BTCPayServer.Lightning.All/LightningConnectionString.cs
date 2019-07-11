@@ -347,10 +347,10 @@ namespace BTCPayServer.Lightning
                         return false;
                     }
 
-                    var ptarmiganApiToken = Take(keyValues, "apiToken");
+                    var ptarmiganApiToken = Take(keyValues, "api-token");
                     if (ptarmiganApiToken == null)
                     {
-                        error = $"The key 'apiToken' is not found";
+                        error = $"The key 'api-token' is not found";
                         return false;
                     }
 
