@@ -548,10 +548,6 @@ namespace BTCPayServer.Lightning
                     {
                         builder.Append($";password={Password}");
                     }
-                    if (Password != null)
-                    {
-                        builder.Append($";password={Password}");
-                    }
                     if (BitcoinHost != null)
                     {
                         builder.Append($";bitcoin-host={BitcoinHost}");

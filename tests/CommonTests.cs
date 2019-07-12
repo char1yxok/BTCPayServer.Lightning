@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Threading.Tasks;
 using Xunit;
 using System.Linq;
@@ -163,6 +163,16 @@ namespace BTCPayServer.Lightning.Tests
                     Assert.Throws<OperationCanceledException>(() => waitTask3.GetAwaiter().GetResult());
                 }
             }
+        }
+
+        [Fact]
+        public void LightMoneyOverflowTest()
+        {
+            var maxSupply = 21_000_000m;
+            var v = LightMoney.Coins(maxSupply);
+            Assert.Equal(v, LightMoney.Satoshis(maxSupply * (decimal)Math.Pow(10, 8)));
+            Assert.Equal(v, LightMoney.Bits(maxSupply * (decimal)Math.Pow(10, 6)));
+            Assert.Equal(v, LightMoney.MilliSatoshis((long)(maxSupply * (decimal)Math.Pow(10, 11))));
         }
 
         [Fact]
