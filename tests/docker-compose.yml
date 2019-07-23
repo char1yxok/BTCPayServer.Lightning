@@ -248,9 +248,11 @@ services:
     ports:
       - "3000:3000"
       - "12345:12345"
+      - "12346:12346"
     expose:
       - "3000"
       - "12345"
+      - "12346"
     volumes:
       - "bitcoind_dir:/root/.bitcoin"
       - "ptarmigan_dir:/data"
@@ -274,9 +276,11 @@ services:
     ports:
       - "3001:3000"
       - "54321:54321"
+      - "54322:54322"
     expose:
       - "3001"
       - "54321"
+      - "54322"
     volumes:
       - "bitcoind_dir:/root/.bitcoin"
       - "ptarmigan_dest_dir:/data"
