@@ -161,16 +161,22 @@ namespace BTCPayServer.Lightning.Ptarmigan
                     };
                 }
 
+                Console.WriteLine("+++++++++++++++++++++++" + rawJson);
+
                 return JsonConvert.DeserializeObject<TResponse>(rawJson, jsonSerializer);
             }
             catch (HttpRequestException e)
             {
+                Console.WriteLine("+++++++++++++++++++++++" + "HttpRequestException");
+
                 Console.WriteLine("HttpRequestException: not work ptarmigan rest api server");
                 Console.WriteLine(e.Message);
                 throw;
             }
             catch (Exception e)
             {
+                Console.WriteLine("+++++++++++++++++++++++" + "Exception");
+
                 Console.WriteLine(e.Message);
                 throw;
             }
