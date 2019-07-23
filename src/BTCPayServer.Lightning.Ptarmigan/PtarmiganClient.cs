@@ -143,8 +143,8 @@ namespace BTCPayServer.Lightning.Ptarmigan
             content.Headers.ContentType = new MediaTypeWithQualityHeaderValue("application/json");
 
             var policy = Policy.Handle<HttpRequestException>()
-                               .WaitAndRetryAsync(3,
-                                retryAttempt => TimeSpan.FromSeconds(retryAttempt * 30));
+                               .WaitAndRetryAsync(5,
+                                retryAttempt => TimeSpan.FromSeconds(retryAttempt * 60));
             try
             {
                 string requestUri = new Uri(_address, method).ToString();
