@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
@@ -8,6 +9,7 @@ using BTCPayServer.Lightning.Ptarmigan.Models;
 using NBitcoin;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
+using Polly;
 
 namespace BTCPayServer.Lightning.Ptarmigan
 {
@@ -24,6 +26,8 @@ namespace BTCPayServer.Lightning.Ptarmigan
             _address = address;
             _apiToken = apiToken;
             _httpClient = httpClient ?? SharedClient;
+
+            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _apiToken);
         }
 
         public async Task<GetInfoResponse> GetInfo(CancellationToken cts = default(CancellationToken))
@@ -125,10 +129,10 @@ namespace BTCPayServer.Lightning.Ptarmigan
 
         private async Task<TResponse> SendCommandAsync<TRequest, TResponse>(string method, TRequest data, CancellationToken cts)
         {
-            var jsonSerializer = new JsonSerializerSettings
+            JsonSerializerSettings jsonSerializer = new JsonSerializerSettings
             { ContractResolver = new CamelCasePropertyNamesContractResolver() };
 
-            HttpContent content = null;
+            HttpContent content = new StringContent("", Encoding.UTF8, "application/json");
             if (data != null && !(data is NoRequestModel))
             {
                 var json = JsonConvert.SerializeObject(data);
@@ -136,34 +140,36 @@ namespace BTCPayServer.Lightning.Ptarmigan
                 content = stringContent;
             }
 
-            var httpRequest = new HttpRequestMessage()
-            {
-                Method = HttpMethod.Post,
-                RequestUri = new Uri(_address, method),
-                Content = content
-            };
-            httpRequest.Headers.Accept.Clear();
-            httpRequest.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-            httpRequest.Headers.Add("Authorization", "Bearer " + _apiToken);
+            content.Headers.ContentType = new MediaTypeWithQualityHeaderValue("application/json");
 
-            var rawResult = await _httpClient.SendAsync(httpRequest, cts);
-            var rawJson = await rawResult.Content.ReadAsStringAsync();
-            if (!rawResult.IsSuccessStatusCode)
-            {
-                throw new PtarmiganApiException()
-                {
-                    Error = JsonConvert.DeserializeObject<PtarmiganApiError>(rawJson, jsonSerializer)
-                };
-            }
-
+            var policy = Policy.Handle<HttpRequestException>()
+                               .WaitAndRetryAsync(3,
+                                retryAttempt => TimeSpan.FromSeconds(retryAttempt * 30));
             try
             {
+                string requestUri = new Uri(_address, method).ToString();
+                var rawResult = await policy.ExecuteAsync(async () => await _httpClient.PostAsync(requestUri, content));
+
+                var rawJson = await rawResult.Content.ReadAsStringAsync();
+                if (!rawResult.IsSuccessStatusCode)
+                {
+                    throw new PtarmiganApiException()
+                    {
+                        Error = JsonConvert.DeserializeObject<PtarmiganApiError>(rawJson, jsonSerializer)
+                    };
+                }
+
                 return JsonConvert.DeserializeObject<TResponse>(rawJson, jsonSerializer);
+            }
+            catch (HttpRequestException e)
+            {
+                Console.WriteLine("HttpRequestException: not work ptarmigan rest api server");
+                Console.WriteLine(e.Message);
+                throw;
             }
             catch (Exception e)
             {
                 Console.WriteLine(e.Message);
-                Console.WriteLine(rawJson);
                 throw;
             }
 
