@@ -2,13 +2,13 @@ version: 2
 jobs:
   build:
     machine: 
-      docker_layer_caching: true
+      docker_layer_caching: false
     steps: 
       - checkout
 
   test:
     machine:
-        docker_layer_caching: true
+        docker_layer_caching: false
     steps:
       - checkout
       - run:
