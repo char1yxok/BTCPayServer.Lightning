@@ -234,7 +234,7 @@ services:
   ptarmigan:
     restart: unless-stopped
     stop_signal: SIGKILL
-    image: nayutaco/ptarmigan:0.1.7
+    image: nayutaco/ptarmigan:0.1.8
     environment:
       NODE_NAME: test
       CHAIN: regtest
@@ -252,7 +252,6 @@ services:
     expose:
       - "3000"
       - "12345"
-      - "12346"
     volumes:
       - "bitcoind_dir:/root/.bitcoin"
       - "ptarmigan_dir:/data"
@@ -262,7 +261,7 @@ services:
   ptarmigan_dest:
     restart: unless-stopped
     stop_signal: SIGKILL
-    image: nayutaco/ptarmigan:0.1.7
+    image: nayutaco/ptarmigan:0.1.8
     environment:
       NODE_NAME: test
       CHAIN: regtest
@@ -280,7 +279,6 @@ services:
     expose:
       - "3001"
       - "54321"
-      - "54322"
     volumes:
       - "bitcoind_dir:/root/.bitcoin"
       - "ptarmigan_dest_dir:/data"
