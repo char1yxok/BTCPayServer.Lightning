@@ -144,26 +144,33 @@ namespace BTCPayServer.Lightning.Ptarmigan
 
             Console.WriteLine("+++++++++++++++++++++++");
 
-            var policy = Policy.Handle<HttpRequestException>()
-                               .WaitAndRetryAsync(5,
-                                retryAttempt => TimeSpan.FromSeconds(retryAttempt * 60));
             try
             {
                 string requestUri = new Uri(_address, method).ToString();
-                var rawResult = await policy.ExecuteAsync(async () => await _httpClient.PostAsync(requestUri, content));
 
-                var rawJson = await rawResult.Content.ReadAsStringAsync();
-                if (!rawResult.IsSuccessStatusCode)
+                var rawResult = await Policy
+                                .Handle<WebException>(ex =>
+                                ((HttpWebResponse)ex.Response).StatusCode == HttpStatusCode.ServiceUnavailable)
+                                .WaitAndRetryAsync
+                                (
+                                    50,
+                                    retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt))
+                                )
+                               .ExecuteAsync(async () => await _httpClient.PostAsync(requestUri, content));
+           
+                if (rawResult.IsSuccessStatusCode)
                 {
-                    throw new PtarmiganApiException()
-                    {
-                        Error = JsonConvert.DeserializeObject<PtarmiganApiError>(rawJson, jsonSerializer)
-                    };
+
+                    var rawJson = await rawResult.Content.ReadAsStringAsync();
+
+                    return JsonConvert.DeserializeObject<TResponse>(rawJson, jsonSerializer);
+
+                  
                 }
 
-                Console.WriteLine("+++++++++++++++++++++++" + rawJson);
 
-                return JsonConvert.DeserializeObject<TResponse>(rawJson, jsonSerializer);
+                throw new Exception();
+
             }
             catch (HttpRequestException e)
             {
